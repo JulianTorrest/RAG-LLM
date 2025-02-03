@@ -108,7 +108,7 @@ st.text(texto[:1000])
 option = st.selectbox("Selecciona una opción", ("RAG: Buscar en el documento", "Estadísticas"))
 
 if option == "Estadísticas":
-    if st.button("Ver estadísticas del documento"):
+    if st.button("Ver estadísticas del documento"):  # Este botón se moverá fuera de las condiciones de RAG
         st.subheader("Estadísticas del Documento")
 
         # Número de palabras
@@ -157,3 +157,4 @@ elif option == "RAG: Buscar en el documento":
             st.write("Este es un extracto relevante del documento.")
         else:
             st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
+
