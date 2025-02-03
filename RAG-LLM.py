@@ -1,19 +1,14 @@
 import streamlit as st
 import requests
 import fitz  # PyMuPDF
-import openai
 import chromadb
 from sentence_transformers import SentenceTransformer
-
-# Configuración de OpenAI API
-OPENAI_API_KEY = "TU_CLAVE_OPENAI"
-openai.api_key = OPENAI_API_KEY
 
 # Modelo de embeddings
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Configuración de ChromaDB
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
+# Configuración de ChromaDB (sin persistencia, solo en memoria)
+chroma_client = chromadb.EphemeralClient()
 collection = chroma_client.get_or_create_collection(name="rag_docs")
 
 # URL del archivo PDF en GitHub
@@ -43,20 +38,6 @@ def buscar_similaridades(query):
     resultados = collection.query(query_embeddings=[query_embedding], n_results=3)
     return "\n".join([doc for doc in resultados["documents"][0]])
 
-def generar_respuesta(pregunta):
-    contexto = buscar_similaridades(pregunta)
-    prompt = f"""
-    Usa el siguiente contexto para responder la pregunta:
-    {contexto}
-    Pregunta: {pregunta}
-    """
-    respuesta = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "system", "content": "Eres un asistente experto."},
-                  {"role": "user", "content": prompt}]
-    )
-    return respuesta["choices"][0]["message"]["content"]
-
 # Interfaz en Streamlit
 st.title("RAG con Streamlit y GitHub")
 
@@ -69,6 +50,6 @@ if st.button("Cargar y procesar PDF"):
 
 pregunta = st.text_input("Haz una pregunta sobre el documento")
 if st.button("Buscar respuesta") and pregunta:
-    respuesta = generar_respuesta(pregunta)
+    respuesta = buscar_similaridades(pregunta)
     st.write(respuesta)
 
