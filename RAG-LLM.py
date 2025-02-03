@@ -19,6 +19,7 @@ GITHUB_PDF_URL = "https://raw.githubusercontent.com/JulianTorrest/RAG-LLM/main/1
 # Inicializar el traductor
 translator = Translator()
 
+# Función para descargar el PDF desde la URL
 def descargar_pdf(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -27,11 +28,13 @@ def descargar_pdf(url):
         return "documento.pdf"
     return None
 
+# Función para extraer texto del PDF
 def extraer_texto(pdf_path):
     doc = fitz.open(pdf_path)
     texto = "".join([page.get_text("text") for page in doc])
     return texto
 
+# Función para indexar el texto en fragmentos (por oraciones)
 def indexar_texto(texto):
     global documentos, embeddings
     chunks = texto.split(". ")  # Dividir en oraciones
@@ -40,13 +43,14 @@ def indexar_texto(texto):
         documentos.append(chunk)
         embeddings.append(embedding)
 
+# Función para buscar similitudes de la pregunta con el contenido del documento
 def buscar_similaridades(query):
     query_embedding = embedding_model.encode(query)
     similitudes = cosine_similarity([query_embedding], embeddings)
     idx_similares = np.argsort(similitudes[0])[::-1][:3]  # Los tres más similares
-    return "\n".join([documentos[i] for i in idx_similares])
+    return "\n".join([documentos[i] for i in idx_similares]), similitudes[0][idx_similares[0]]
 
-# Función para traducir el texto
+# Función para traducir el texto a inglés
 def traducir_a_ingles(texto):
     return translator.translate(texto, src='es', dest='en').text
 
@@ -57,21 +61,43 @@ def traducir_a_espanol(texto):
 # Interfaz en Streamlit
 st.title("RAG con Streamlit y GitHub")
 
-# Descargar y procesar el PDF automáticamente al cargar la app
-st.write("Procesando PDF...")
+# Cargar PDF desde la URL o cargar un PDF proporcionado por el usuario
+uploaded_file = st.file_uploader("Cargar un archivo PDF", type=["pdf"])
 
-pdf_path = descargar_pdf(GITHUB_PDF_URL)
-if pdf_path:
-    texto = extraer_texto(pdf_path)
+if uploaded_file is not None:
+    with open("user_uploaded_pdf.pdf", "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    st.success("Archivo PDF cargado con éxito.")
+    texto = extraer_texto("user_uploaded_pdf.pdf")
     indexar_texto(texto)
-    st.success("PDF procesado e indexado correctamente.")
+else:
+    st.write("Procesando PDF predeterminado...")
+    pdf_path = descargar_pdf(GITHUB_PDF_URL)
+    if pdf_path:
+        texto = extraer_texto(pdf_path)
+        indexar_texto(texto)
+        st.success("PDF procesado e indexado correctamente.")
 
+# Mostrar vista previa del texto extraído
+st.subheader("Vista previa del PDF procesado (primeros 1000 caracteres):")
+st.text(texto[:1000])
+
+# Entrada para la pregunta
 pregunta = st.text_input("Haz una pregunta sobre el documento en español")
 
 if st.button("Buscar respuesta") and pregunta:
     # Traducir la pregunta a inglés
     pregunta_ingles = traducir_a_ingles(pregunta)
-    respuesta_ingles = buscar_similaridades(pregunta_ingles)
+    # Buscar la similitud
+    respuesta_ingles, similitud = buscar_similaridades(pregunta_ingles)
     # Traducir la respuesta al español
     respuesta_espanol = traducir_a_espanol(respuesta_ingles)
-    st.write(respuesta_espanol)
+    # Mostrar la respuesta y la similitud
+    st.write(f"Respuesta: {respuesta_espanol}")
+    st.write(f"Similitud de la respuesta: {similitud:.2f}")
+    
+    # Mostrar más detalles si la similitud es alta
+    if similitud > 0.5:
+        st.write("Este es un extracto relevante del documento.")
+    else:
+        st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
