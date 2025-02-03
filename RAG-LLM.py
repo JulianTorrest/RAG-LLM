@@ -104,10 +104,7 @@ else:
 st.subheader("Vista previa del PDF procesado (primeros 1000 caracteres):")
 st.text(texto[:1000])
 
-# Botón de estadísticas y opción de búsqueda RAG
-st.subheader("Selecciona una opción")
-
-# Botón para ver estadísticas del documento
+# Botón para ver estadísticas del documento (siempre visible)
 if st.button("Ver estadísticas del documento"):
     st.subheader("Estadísticas del Documento")
 
