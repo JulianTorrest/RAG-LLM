@@ -1,11 +1,10 @@
 streamlit
 requests
-PyMuPDF
+PyMuPDF==1.18.19
 numpy
 sentence-transformers
 scikit-learn
 googletrans==4.0.0-rc1
 wordcloud
 matplotlib
-PyMuPDF==1.18.19
 fitz
