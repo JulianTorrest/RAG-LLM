@@ -1,6 +1,6 @@
 streamlit
 requests
-fitz
+PyMuPDF
 numpy
 sentence-transformers
 scikit-learn
@@ -8,4 +8,4 @@ googletrans==4.0.0-rc1
 wordcloud
 matplotlib
 PyMuPDF==1.18.19
-
+fitz
