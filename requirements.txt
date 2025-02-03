@@ -1,6 +1,5 @@
 streamlit
 requests
 pymupdf
-openai
-chromadb
+chromadb==0.4.14
 sentence-transformers
