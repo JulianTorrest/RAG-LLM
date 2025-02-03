@@ -104,41 +104,41 @@ else:
 st.subheader("Vista previa del PDF procesado (primeros 1000 caracteres):")
 st.text(texto[:1000])
 
-# Agregar botón para ir a estadísticas
-if st.button("Ver estadísticas del documento"):
-    st.subheader("Estadísticas del Documento")
-
-    # Número de palabras
-    num_palabras = len(texto.split())
-    st.write(f"Número de palabras: {num_palabras}")
-
-    # Número de oraciones
-    num_oraciones = len(texto.split(". "))
-    st.write(f"Número de oraciones: {num_oraciones}")
-
-    # Número de párrafos
-    num_parrafos = len(texto.split("\n"))
-    st.write(f"Número de párrafos: {num_parrafos}")
-
-    # Generar nube de palabras
-    st.subheader("Nube de Palabras")
-    generar_nube_palabras(texto)
-
-    # Análisis de clustering (Map-Reduce)
-    st.subheader("Clustering del Documento (Map-Reduce)")
-    kmeans, X_pca = clustering_documento(texto)
-    st.write(f"Clustering (KMeans) y reducción de dimensionalidad con PCA realizada. Puedes ver la visualización a continuación.")
-
-    # Mostrar gráfico de PCA
-    fig, ax = plt.subplots(figsize=(8, 8))
-    ax.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans.labels_, cmap='viridis')
-    ax.set_title("Visualización de Clustering con PCA")
-    st.pyplot(fig)
-
 # Crear el menú de navegación para cambiar entre la funcionalidad de RAG y estadísticas
 option = st.selectbox("Selecciona una opción", ("RAG: Buscar en el documento", "Estadísticas"))
 
-if option == "RAG: Buscar en el documento":
+if option == "Estadísticas":
+    if st.button("Ver estadísticas del documento"):
+        st.subheader("Estadísticas del Documento")
+
+        # Número de palabras
+        num_palabras = len(texto.split())
+        st.write(f"Número de palabras: {num_palabras}")
+
+        # Número de oraciones
+        num_oraciones = len(texto.split(". "))
+        st.write(f"Número de oraciones: {num_oraciones}")
+
+        # Número de párrafos
+        num_parrafos = len(texto.split("\n"))
+        st.write(f"Número de párrafos: {num_parrafos}")
+
+        # Generar nube de palabras
+        st.subheader("Nube de Palabras")
+        generar_nube_palabras(texto)
+
+        # Análisis de clustering (Map-Reduce)
+        st.subheader("Clustering del Documento (Map-Reduce)")
+        kmeans, X_pca = clustering_documento(texto)
+        st.write(f"Clustering (KMeans) y reducción de dimensionalidad con PCA realizada. Puedes ver la visualización a continuación.")
+
+        # Mostrar gráfico de PCA
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans.labels_, cmap='viridis')
+        ax.set_title("Visualización de Clustering con PCA")
+        st.pyplot(fig)
+
+elif option == "RAG: Buscar en el documento":
     pregunta = st.text_input("Haz una pregunta sobre el documento en español")
 
     if st.button("Buscar respuesta") and pregunta:
@@ -157,4 +157,3 @@ if option == "RAG: Buscar en el documento":
             st.write("Este es un extracto relevante del documento.")
         else:
             st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
-
