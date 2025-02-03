@@ -1,6 +1,9 @@
 streamlit
 requests
-pymupdf
+fitz
+numpy
 sentence-transformers
 scikit-learn
-numpy
+googletrans==4.0.0-rc1
+wordcloud
+matplotlib
