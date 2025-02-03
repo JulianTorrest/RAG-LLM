@@ -5,6 +5,11 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from googletrans import Translator
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 
 # Modelo de embeddings
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -58,6 +63,23 @@ def traducir_a_ingles(texto):
 def traducir_a_espanol(texto):
     return translator.translate(texto, src='en', dest='es').text
 
+# Función para generar la nube de palabras
+def generar_nube_palabras(texto):
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(texto)
+    plt.figure(figsize=(8, 8), facecolor=None)
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    plt.show()
+
+# Función para realizar un análisis de clustering (Map-Reduce) con KMeans
+def clustering_documento(texto):
+    vectorizer = CountVectorizer(stop_words='english')
+    X = vectorizer.fit_transform([texto])
+    kmeans = KMeans(n_clusters=3, random_state=0).fit(X)
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X.toarray())
+    return kmeans, X_pca
+
 # Interfaz en Streamlit
 st.title("RAG con Streamlit y GitHub")
 
@@ -82,22 +104,56 @@ else:
 st.subheader("Vista previa del PDF procesado (primeros 1000 caracteres):")
 st.text(texto[:1000])
 
-# Entrada para la pregunta
-pregunta = st.text_input("Haz una pregunta sobre el documento en español")
+# Crear el menú de navegación para cambiar entre la funcionalidad de RAG y estadísticas
+option = st.selectbox("Selecciona una opción", ("RAG: Buscar en el documento", "Estadísticas"))
 
-if st.button("Buscar respuesta") and pregunta:
-    # Traducir la pregunta a inglés
-    pregunta_ingles = traducir_a_ingles(pregunta)
-    # Buscar la similitud
-    respuesta_ingles, similitud = buscar_similaridades(pregunta_ingles)
-    # Traducir la respuesta al español
-    respuesta_espanol = traducir_a_espanol(respuesta_ingles)
-    # Mostrar la respuesta y la similitud
-    st.write(f"Respuesta: {respuesta_espanol}")
-    st.write(f"Similitud de la respuesta: {similitud:.2f}")
-    
-    # Mostrar más detalles si la similitud es alta
-    if similitud > 0.5:
-        st.write("Este es un extracto relevante del documento.")
-    else:
-        st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
+if option == "RAG: Buscar en el documento":
+    pregunta = st.text_input("Haz una pregunta sobre el documento en español")
+
+    if st.button("Buscar respuesta") and pregunta:
+        # Traducir la pregunta a inglés
+        pregunta_ingles = traducir_a_ingles(pregunta)
+        # Buscar la similitud
+        respuesta_ingles, similitud = buscar_similaridades(pregunta_ingles)
+        # Traducir la respuesta al español
+        respuesta_espanol = traducir_a_espanol(respuesta_ingles)
+        # Mostrar la respuesta y la similitud
+        st.write(f"Respuesta: {respuesta_espanol}")
+        st.write(f"Similitud de la respuesta: {similitud:.2f}")
+        
+        # Mostrar más detalles si la similitud es alta
+        if similitud > 0.5:
+            st.write("Este es un extracto relevante del documento.")
+        else:
+            st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
+
+elif option == "Estadísticas":
+    # Generar y mostrar estadísticas del documento
+    st.subheader("Estadísticas del Documento")
+
+    # Número de palabras
+    num_palabras = len(texto.split())
+    st.write(f"Número de palabras: {num_palabras}")
+
+    # Número de oraciones
+    num_oraciones = len(texto.split(". "))
+    st.write(f"Número de oraciones: {num_oraciones}")
+
+    # Número de párrafos
+    num_parrafos = len(texto.split("\n"))
+    st.write(f"Número de párrafos: {num_parrafos}")
+
+    # Generar nube de palabras
+    st.subheader("Nube de Palabras")
+    generar_nube_palabras(texto)
+
+    # Análisis de clustering (Map-Reduce)
+    st.subheader("Clustering del Documento (Map-Reduce)")
+    kmeans, X_pca = clustering_documento(texto)
+    st.write(f"Clustering (KMeans) y reducción de dimensionalidad con PCA realizada. Puedes ver la visualización a continuación.")
+
+    # Mostrar gráfico de PCA
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans.labels_, cmap='viridis')
+    ax.set_title("Visualización de Clustering con PCA")
+    st.pyplot(fig)
