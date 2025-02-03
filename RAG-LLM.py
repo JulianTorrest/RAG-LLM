@@ -104,31 +104,8 @@ else:
 st.subheader("Vista previa del PDF procesado (primeros 1000 caracteres):")
 st.text(texto[:1000])
 
-# Crear el menú de navegación para cambiar entre la funcionalidad de RAG y estadísticas
-option = st.selectbox("Selecciona una opción", ("RAG: Buscar en el documento", "Estadísticas"))
-
-if option == "RAG: Buscar en el documento":
-    pregunta = st.text_input("Haz una pregunta sobre el documento en español")
-
-    if st.button("Buscar respuesta") and pregunta:
-        # Traducir la pregunta a inglés
-        pregunta_ingles = traducir_a_ingles(pregunta)
-        # Buscar la similitud
-        respuesta_ingles, similitud = buscar_similaridades(pregunta_ingles)
-        # Traducir la respuesta al español
-        respuesta_espanol = traducir_a_espanol(respuesta_ingles)
-        # Mostrar la respuesta y la similitud
-        st.write(f"Respuesta: {respuesta_espanol}")
-        st.write(f"Similitud de la respuesta: {similitud:.2f}")
-        
-        # Mostrar más detalles si la similitud es alta
-        if similitud > 0.5:
-            st.write("Este es un extracto relevante del documento.")
-        else:
-            st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
-
-elif option == "Estadísticas":
-    # Generar y mostrar estadísticas del documento
+# Agregar botón para ir a estadísticas
+if st.button("Ver estadísticas del documento"):
     st.subheader("Estadísticas del Documento")
 
     # Número de palabras
@@ -157,3 +134,27 @@ elif option == "Estadísticas":
     ax.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans.labels_, cmap='viridis')
     ax.set_title("Visualización de Clustering con PCA")
     st.pyplot(fig)
+
+# Crear el menú de navegación para cambiar entre la funcionalidad de RAG y estadísticas
+option = st.selectbox("Selecciona una opción", ("RAG: Buscar en el documento", "Estadísticas"))
+
+if option == "RAG: Buscar en el documento":
+    pregunta = st.text_input("Haz una pregunta sobre el documento en español")
+
+    if st.button("Buscar respuesta") and pregunta:
+        # Traducir la pregunta a inglés
+        pregunta_ingles = traducir_a_ingles(pregunta)
+        # Buscar la similitud
+        respuesta_ingles, similitud = buscar_similaridades(pregunta_ingles)
+        # Traducir la respuesta al español
+        respuesta_espanol = traducir_a_espanol(respuesta_ingles)
+        # Mostrar la respuesta y la similitud
+        st.write(f"Respuesta: {respuesta_espanol}")
+        st.write(f"Similitud de la respuesta: {similitud:.2f}")
+        
+        # Mostrar más detalles si la similitud es alta
+        if similitud > 0.5:
+            st.write("Este es un extracto relevante del documento.")
+        else:
+            st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
+
