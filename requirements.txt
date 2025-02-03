@@ -7,4 +7,5 @@ scikit-learn
 googletrans==4.0.0-rc1
 wordcloud
 matplotlib
-PyMuPDF
+PyMuPDF==1.18.19
+
