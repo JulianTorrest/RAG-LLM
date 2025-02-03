@@ -17,7 +17,7 @@ chroma_client = chromadb.PersistentClient(path="./chroma_db")
 collection = chroma_client.get_or_create_collection(name="rag_docs")
 
 # URL del archivo PDF en GitHub
-GITHUB_PDF_URL = "https://raw.githubusercontent.com/usuario/repositorio/main/documento.pdf"
+GITHUB_PDF_URL = "https://raw.githubusercontent.com/JulianTorrest/RAG-LLM/main/1210-Insurance-2030-The-impact-of-AI-on-the-future-of-insurance-_-McKinsey-Company.pdf"
 
 def descargar_pdf(url):
     response = requests.get(url)
