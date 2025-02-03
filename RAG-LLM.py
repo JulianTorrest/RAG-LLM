@@ -45,16 +45,16 @@ def buscar_similaridades(query):
 # Interfaz en Streamlit
 st.title("RAG con Streamlit y GitHub")
 
-if st.button("Cargar y procesar PDF"):
-    pdf_path = descargar_pdf(GITHUB_PDF_URL)
-    if pdf_path:
-        texto = extraer_texto(pdf_path)
-        indexar_texto(texto)
-        st.success("PDF procesado e indexado correctamente.")
+# Descargar y procesar el PDF automáticamente al cargar la app
+st.write("Procesando PDF...")
+
+pdf_path = descargar_pdf(GITHUB_PDF_URL)
+if pdf_path:
+    texto = extraer_texto(pdf_path)
+    indexar_texto(texto)
+    st.success("PDF procesado e indexado correctamente.")
 
 pregunta = st.text_input("Haz una pregunta sobre el documento")
 if st.button("Buscar respuesta") and pregunta:
     respuesta = buscar_similaridades(pregunta)
     st.write(respuesta)
-
-
