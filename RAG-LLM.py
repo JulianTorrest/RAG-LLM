@@ -102,11 +102,16 @@ else:
 
 # Mostrar vista previa del texto extraído
 st.subheader("Vista previa del PDF procesado (primeros 1000 caracteres):")
-st.text(texto[:1000])
+st.text(texto[:1000] if texto else "No se ha podido extraer texto del documento.")
 
-# Botón para ver estadísticas del documento (siempre visible)
+# Depuración: Mensaje para asegurar que el código llega a este punto
+st.write("Renderizando botón de estadísticas...")  
+
+# Botón SIEMPRE visible para ver estadísticas
 if st.button("Ver estadísticas del documento"):
     st.subheader("Estadísticas del Documento")
+    st.write("Aquí irían las estadísticas del documento procesado.")
+
 
     # Número de palabras
     num_palabras = len(texto.split())
@@ -127,33 +132,10 @@ if st.button("Ver estadísticas del documento"):
     # Análisis de clustering (Map-Reduce)
     st.subheader("Clustering del Documento (Map-Reduce)")
     kmeans, X_pca = clustering_documento(texto)
-    st.write(f"Clustering (KMeans) y reducción de dimensionalidad con PCA realizada. Puedes ver la visualización a continuación.")
+    st.write("Clustering (KMeans) y reducción de dimensionalidad con PCA realizada. Puedes ver la visualización a continuación.")
 
     # Mostrar gráfico de PCA
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.scatter(X_pca[:, 0], X_pca[:, 1], c=kmeans.labels_, cmap='viridis')
     ax.set_title("Visualización de Clustering con PCA")
     st.pyplot(fig)
-
-# Menú para buscar en el documento
-option = st.selectbox("Selecciona una opción", ("RAG: Buscar en el documento", "Estadísticas"))
-
-if option == "RAG: Buscar en el documento":
-    pregunta = st.text_input("Haz una pregunta sobre el documento en español")
-
-    if st.button("Buscar respuesta") and pregunta:
-        # Traducir la pregunta a inglés
-        pregunta_ingles = traducir_a_ingles(pregunta)
-        # Buscar la similitud
-        respuesta_ingles, similitud = buscar_similaridades(pregunta_ingles)
-        # Traducir la respuesta al español
-        respuesta_espanol = traducir_a_espanol(respuesta_ingles)
-        # Mostrar la respuesta y la similitud
-        st.write(f"Respuesta: {respuesta_espanol}")
-        st.write(f"Similitud de la respuesta: {similitud:.2f}")
-        
-        # Mostrar más detalles si la similitud es alta
-        if similitud > 0.5:
-            st.write("Este es un extracto relevante del documento.")
-        else:
-            st.write("La respuesta podría no ser tan precisa. Intenta hacer una pregunta diferente.")
